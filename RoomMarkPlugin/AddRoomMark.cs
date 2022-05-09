@@ -20,36 +20,21 @@ namespace RoomMarkPlugin
                 .OfClass(typeof(Level))
                 .OfType<Level>()
                 .ToList();
-            List<ElementId> rooms = null;
-
+            List<ElementId> rooms;
             Transaction transaction = new Transaction(document, "Создание помещений");
             transaction.Start();
+            int levelNum = 1;
             foreach (Level level in levels)
             {
-                    rooms = (List<ElementId>)document.Create.NewRooms2(level);
-            }
-            transaction.Commit();
-            FilteredElementCollector filteredRooms = new FilteredElementCollector(document)
-                    .OfCategory(BuiltInCategory.OST_Rooms);
-            List<ElementId> roomId = filteredRooms.ToElementIds() as List<ElementId>;
-            Transaction transaction1 = new Transaction(document, "Создание марок");
-            transaction1.Start();
-            foreach (Level level in levels)
-            {
-                int levelNum = 1;
-                foreach (ElementId id in roomId)
+                rooms = (List<ElementId>)document.Create.NewRooms2(level);
+                foreach (ElementId id in rooms)
                 {
                     Room room = document.GetElement(id) as Room;
                     room.Name = $"{levelNum}_{room.Number}";
-                    //LocationPoint locationPoint = room.Location as LocationPoint;
-                    //UV roomTagLocation = new UV(locationPoint.Point.X, locationPoint.Point.Y);
-                    UV roomTagLocation = new UV(0, 0);
-                    LinkElementId roomLinkId = new LinkElementId(id);
-                    RoomTag roomTag = document.Create.NewRoomTag(roomLinkId, roomTagLocation, null);
-                    levelNum++;
                 }
+                levelNum++;
             }
-            transaction1.Commit();
+            transaction.Commit();
             return Result.Succeeded;
         }
     }
